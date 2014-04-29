@@ -64,7 +64,7 @@ def usage():
     print >>sys.stderr, "-x\t\t\tExplain mismatches if they occur"
     print >>sys.stderr, "--region=<aws-region>\tSet AWS region containing servers"
     print >>sys.stderr, "--group=<halo-group>\tSet Halo Server Group containing servers"
-    print >>sys.stderr, "--auth=<auth-file>\tSet Halo Server Group containing servers"
+    print >>sys.stderr, "--auth=<auth-file>\tSet Halo API authentication file"
     print >>sys.stderr, "--dryrun\t\tPrint out what SGs would be assigned but don't do actual changes"
 
 
