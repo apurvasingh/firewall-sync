@@ -333,6 +333,9 @@ if (group != None):
         print "Windows FWP ID: %s" % group.windows_firewall_policy_id
     if (fwp != None):
         dumpFirewallPolicy(fwp)
+    else:
+        print >> sys.stderr,"Server group does not have a Linux firewall policy"
+        sys.exit(3)
 
 print ""
 ec2conn = None
@@ -398,10 +401,14 @@ instance_sg_list = []
 for name in sgList:
     instance_sg_list.append(sgMap[name].id)
 if (addCount > 0) and (not dryRun):
-    if instance.modify_attribute("groupSet",instance_sg_list):
-        print "ModifyAttribute: success"
-    else:
-        print "ModifyAttribute: failed"
+    try:
+        if instance.modify_attribute("groupSet",instance_sg_list):
+            print "ModifyAttribute: success"
+        else:
+            print "ModifyAttribute: failed"
+    except boto.exception.EC2ResponseError:
+        print >>sys.stderr, "Failed to modify list of SGs attached to instance"
+        print >>sys.stderr, "You may have too many SGs"
 elif (dryRun):
     print "Dry run, no changes made"
 else:
