@@ -64,7 +64,7 @@ def usage():
     print >>sys.stderr, "-x\t\t\tExplain mismatches if they occur"
     print >>sys.stderr, "--region=<aws-region>\tSet AWS region containing servers"
     print >>sys.stderr, "--group=<halo-group>\tSet Halo Server Group containing servers"
-    print >>sys.stderr, "--auth=<auth-file>\tSet Halo API authentication file"
+    print >>sys.stderr, "--auth=<auth-file>\tSet Halo Server Group containing servers"
     print >>sys.stderr, "--dryrun\t\tPrint out what SGs would be assigned but don't do actual changes"
 
 
@@ -231,8 +231,19 @@ def sgMatchFirewallService(rule,sgRule):
         fwsvc = rule['firewall_service']
         protocol = fwsvc['protocol'].lower()
         port = int(fwsvc['port'])
-        from_port = int(sgRule.from_port)
-        to_port = int(sgRule.to_port)
+        if (sgRule.from_port != None) and (sgRule.to_port != None):
+            from_port = int(sgRule.from_port)
+            to_port = int(sgRule.to_port)
+        elif (sgRule.from_port != None) and (sgRule.to_port == None):
+            from_port = int(sgRule.from_port)
+            to_port = int(sgRule.from_port)
+        elif (sgRule.from_port == None) and (sgRule.to_port != None):
+            from_port = int(sgRule.to_port)
+            to_port = int(sgRule.to_port)
+        else:
+            return False
+        if (sgRule.ip_protocol == None):
+            return False
         if (protocol == sgRule.ip_protocol.lower()) and (port == from_port) and (port == to_port):
             return True
     return False
@@ -264,7 +275,11 @@ def sgMatchesHaloFWP(sg,ruleList,prefix):
     if (prefix != None) and (not sg.name.startswith(prefix)):
         return False
     for sgRule in sg.rules:
+        if (sgRule == None):
+            continue
         for grant in sgRule.grants:
+            if (grant == None):
+                continue
             matched = False
             for rule in ruleList:
                 if (not matchRuleDirection(rule['chain'],sgRule.inbound)):
