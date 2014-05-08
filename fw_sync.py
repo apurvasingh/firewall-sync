@@ -274,13 +274,13 @@ def sgMatchHaloRule(sgRule,grant,ruleList,explain):
 def sgMatchesHaloFWP(sg,ruleList,prefix):
     if (prefix != None) and (not sg.name.startswith(prefix)):
         return False
+    matched = False
     for sgRule in sg.rules:
-        if (sgRule == None):
-            continue
+        #if (sgRule == None):
+        #    continue
         for grant in sgRule.grants:
-            if (grant == None):
-                continue
-            matched = False
+            #if (grant == None):
+            #    continue
             for rule in ruleList:
                 if (not matchRuleDirection(rule['chain'],sgRule.inbound)):
                     continue
@@ -288,14 +288,18 @@ def sgMatchesHaloFWP(sg,ruleList,prefix):
                     continue
                 if (not sgMatchFirewallService(rule,sgRule)):
                     continue
-                matched = True
             if not sgMatchHaloRule(sgRule,grant,ruleList,False):
                 if (explainMismatches):
                     print "SG %s did not match: %s | %s" % (sg.name, sgRule.to_short_s(), grant.to_s())
                     sgMatchHaloRule(sgRule,grant,ruleList,True)
                 return False
-    print "Matching SG: %s" % sg.name
-    return True
+            else:
+                matched = True # must be at least one rule/grant in order to match, i.e. don't match empty rules
+    if (matched):
+        print "Matching SG: %s" % sg.name
+        return True
+    else:
+        return False
 
 
 def addPredefinedRules(svcName,port,protocol,inbound,outbound):
